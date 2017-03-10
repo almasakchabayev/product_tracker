@@ -25,7 +25,6 @@ defmodule ProductTracker do
   end
 
   def process_record(map) do
-    IO.inspect map
     # Validate input
     changeset = ProductRecord.changeset(%ProductRecord{}, map)
 
@@ -37,30 +36,38 @@ defmodule ProductTracker do
       case Repo.get_by(Product, external_product_id: Map.get(map, "id")) do
         nil ->
           # if there is no such product then store to db
-          Logger.info "Creating a new product with the following information \n#{inspect map}"
-          product_record
-          |> ProductRecord.to_product
-          |> Repo.insert!
+          insert_product(product_record)
         product ->
-          # If product name is the same
+          # If there is such product then check if product name is the same
           if product.product_name == product_record.name do
-            # if there is such a product then store past price record and update product
-            Logger.info "Creating a new past price record and updating a product's price with the following information #{inspect map}"
-            Repo.transaction fn ->
-              # store past price record
-              Repo.insert! ProductRecord.to_past_price_record(product_record, product)
-              
-              # Update product, update requires a changset
-              Repo.update! ProductRecord.to_product_changeset(product_record, product)
-            end
+            # If product name is the same then store past price record and update product
+            insert_past_price_update_product(product_record)
           else
-            # If product name is not the same, then log error about mismatch
+            # If product name is not the same then log error about mismatch
             Logger.error "Name mismatch \n#{inspect map} \n#{inspect product}"
           end
       end
     else
-      # If changeset is invalid Log error
+      # If changeset is invalid log error
       Logger.error "Invalid information is passed \n#{inspect map}"
+    end
+  end
+
+  defp insert_product(product_record) do
+    Logger.info "Creating a new product with the following information \n#{inspect product_record}"
+    product_record
+    |> ProductRecord.to_product
+    |> Repo.insert!
+  end
+
+  defp insert_past_price_update_product(product_record) do
+    Logger.info "Creating a new past price record and updating a product's price with the following information #{inspect product_record}"
+    Repo.transaction fn ->
+      # store past price record
+      Repo.insert! ProductRecord.to_past_price_record(product_record, product)
+      
+      # Update product, update requires a changset
+      Repo.update! ProductRecord.to_product_changeset(product_record, product)
     end
   end
 
