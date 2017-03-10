@@ -2,7 +2,7 @@ defmodule ProductTrackerTest do
   use ProductTracker.ConnCase, async: true
   doctest ProductTracker
 
-  test "'process_product' creates a new product if there is NO product with external_product_id and the product is not discontinued" do
+  test "'process_record' creates a new product if there is NO product with external_product_id and the product is not discontinued" do
     record = %{"category" => "home-furnishings",
                 "discontinued" => false,
                 "id" => 123456,
