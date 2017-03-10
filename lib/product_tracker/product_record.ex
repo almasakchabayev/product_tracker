@@ -57,6 +57,17 @@ defmodule ProductTracker.ProductRecord do
     |> normalize_price
   end
 
+  @doc """
+  Parses dollar amount into pennies
+
+  ## Examples
+
+      iex> ProductTracker.ProductRecord.normalize_price("$31.28")
+      3128
+
+      iex> ProductTracker.ProductRecord.normalize_price("$189.56")
+      18956
+  """
   def normalize_price(string) when is_binary(string) do
     {price, _} =
       string
