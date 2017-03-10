@@ -14,12 +14,18 @@ defmodule ProductTracker do
   @network Application.get_env(:product_tracker, :network)
 
   def update_records do
+    result =
+      @network.get(@url, [], params: params())
+      |> Map.get("productRecords")
+    IO.inspect result
     @network.get(@url, [], params: params())
     |> Map.get("productRecords")
     |> Task.async_stream(__MODULE__, :process_record, [])
+    |> Stream.run
   end
 
   def process_record(map) do
+    IO.inspect map
     # Validate input
     changeset = ProductRecord.changeset(%ProductRecord{}, map)
 
@@ -36,9 +42,6 @@ defmodule ProductTracker do
           |> ProductRecord.to_product
           |> Repo.insert!
         product ->
-          IO.inspect product.product_name
-          IO.inspect product_record.name
-
           # If product name is the same
           if product.product_name == product_record.name do
             # if there is such a product then store past price record and update product
