@@ -56,7 +56,7 @@ defmodule ProductTracker.ProductRecord do
     |> Map.get(:price)
     |> normalize_price
   end
-  
+
   def normalize_price(string) when is_binary(string) do
     {price, _} =
       string

@@ -31,24 +31,33 @@ defmodule ProductTracker do
       case Repo.get_by(Product, external_product_id: Map.get(map, "id")) do
         nil ->
           # if there is no such product then store to db
-          Logger.info "Creating a new product with the following information #{inspect map}"
+          Logger.info "Creating a new product with the following information \n#{inspect map}"
           product_record
           |> ProductRecord.to_product
           |> Repo.insert!
         product ->
-          # if there is such a product then store past price record and update product
-          Logger.info "Creating a new past price record and updating a product's price with the following information #{inspect map}"
-          Repo.transaction fn ->
-            # store past price record
-            Repo.insert! ProductRecord.to_past_price_record(product_record, product)
-            
-            # Update product, update requires a changset
-            product = Repo.update! ProductRecord.to_product_changeset(product_record, product)
+          IO.inspect product.product_name
+          IO.inspect product_record.name
+
+          # If product name is the same
+          if product.product_name == product_record.name do
+            # if there is such a product then store past price record and update product
+            Logger.info "Creating a new past price record and updating a product's price with the following information #{inspect map}"
+            Repo.transaction fn ->
+              # store past price record
+              Repo.insert! ProductRecord.to_past_price_record(product_record, product)
+              
+              # Update product, update requires a changset
+              Repo.update! ProductRecord.to_product_changeset(product_record, product)
+            end
+          else
+            # If product name is not the same, then log error about mismatch
+            Logger.error "Name mismatch \n#{inspect map} \n#{inspect product}"
           end
       end
     else
       # If changeset is invalid Log error
-      Logger.error "Invalid information is passed #{inspect map}"
+      Logger.error "Invalid information is passed \n#{inspect map}"
     end
   end
 
