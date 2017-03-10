@@ -9,5 +9,7 @@ defmodule ProductTracker.Repo.Migrations.CreateProducts do
 
       timestamps()
     end
+
+    create unique_index(:products, [:external_product_id])
   end
 end

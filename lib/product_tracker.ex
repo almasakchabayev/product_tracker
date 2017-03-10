@@ -5,6 +5,7 @@ defmodule ProductTracker do
 
   require Logger
   
+  alias ProductTracker.Product
   alias ProductTracker.ProductRecord
   alias ProductTracker.Repo
 
@@ -19,19 +20,35 @@ defmodule ProductTracker do
   end
 
   def process_record(map) do
+    # Validate input
     changeset = ProductRecord.changeset(%ProductRecord{}, map)
 
-    # add an if statement for existing_product_id
     if changeset.valid? do
-      Logger.info "Creating a new product with the following information #{inspect map}"
-      
-      Ecto.Changeset.apply_changes(changeset)
-      |> ProductRecord.to_product
-      |> Repo.insert
-      |> case do
-           {:ok, product} -> {:ok, product}
-           {:error, changeset} -> {:error, changeset}
+      # If changeset is valid make a product_record
+      product_record = Ecto.Changeset.apply_changes(changeset)
+
+      # Try to get the product by external_product_id
+      case Repo.get_by(Product, external_product_id: Map.get(map, "id")) do
+        nil ->
+          # if there is no such product then store to db
+          Logger.info "Creating a new product with the following information #{inspect map}"
+          product_record
+          |> ProductRecord.to_product
+          |> Repo.insert!
+        product ->
+          # if there is such a product then store past price record and update product
+          Logger.info "Creating a new past price record and updating a product's price with the following information #{inspect map}"
+          Repo.transaction fn ->
+            # store past price record
+            Repo.insert! ProductRecord.to_past_price_record(product_record, product)
+            
+            # Update product, update requires a changset
+            product = Repo.update! ProductRecord.to_product_changeset(product_record, product)
+          end
       end
+    else
+      # If changeset is invalid Log error
+      Logger.error "Invalid information is passed #{inspect map}"
     end
   end
 
