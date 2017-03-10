@@ -14,10 +14,6 @@ defmodule ProductTracker do
   @network Application.get_env(:product_tracker, :network)
 
   def update_records do
-    result =
-      @network.get(@url, [], params: params())
-      |> Map.get("productRecords")
-    IO.inspect result
     @network.get(@url, [], params: params())
     |> Map.get("productRecords")
     |> Task.async_stream(__MODULE__, :process_record, [])
