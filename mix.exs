@@ -22,7 +22,10 @@ defmodule ProductTracker.Mixfile do
 
   defp deps do
     [{:ecto, "~> 2.1"},
-     {:postgrex, "~> 0.13.2"}]
+     {:postgrex, "~> 0.13.2"},
+     {:httpoison, "~> 0.11.1"},
+     {:calendar, "~> 0.17.2"},
+     {:poison, "~> 3.1"}]
   end
 
   defp aliases do

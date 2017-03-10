@@ -1,8 +1,14 @@
 defmodule ProductTrackerTest do
-  use ExUnit.Case
+  use ProductTracker.ConnCase, async: true
   doctest ProductTracker
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "'process_product' creates a new product if there is NO product with external_product_id and the product is not discontinued" do
+    record = %{"category" => "home-furnishings",
+                "discontinued" => false,
+                "id" => 123456,
+                "name" => "Nice Chair",
+                "price" => "$30.25"}
+    {:ok, product} = ProductTracker.process_record(record)
+    assert product.id
   end
 end

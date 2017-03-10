@@ -1,11 +1,11 @@
-defmodule Account.ConnCase do
+defmodule ProductTracker.ConnCase do
   use ExUnit.CaseTemplate
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Account.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(ProductTracker.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Account.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(ProductTracker.Repo, {:shared, self()})
     end
 
     :ok
